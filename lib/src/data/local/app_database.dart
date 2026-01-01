@@ -7,10 +7,12 @@ import 'package:path_provider/path_provider.dart';
 
 import 'tables/transaction_table.dart';
 import 'tables/wallet_table.dart';
+import 'tables/categories_table.dart';
+import 'tables/budgets_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Transactions, Wallets])
+@DriftDatabase(tables: [Transactions, Wallets, Categories, Budgets])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 

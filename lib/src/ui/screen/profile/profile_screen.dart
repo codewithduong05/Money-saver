@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:save_money/src/ui/screen/profile/setting/setting_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -26,7 +27,12 @@ class ProfileScreen extends StatelessWidget {
             leading: const Icon(Icons.settings_outlined),
             title: const Text('Cài đặt'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingScreen()),
+              );
+            },
           ),
           SwitchListTile(
             secondary: const Icon(Icons.brightness_6_outlined),
