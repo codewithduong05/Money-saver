@@ -1,5 +1,6 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:save_money/src/injector.dart';
 import 'package:save_money/src/ui/screen/home/main_screen.dart';
 // import 'package:riverpod/riverpod.dart';
 
@@ -9,6 +10,7 @@ void main() async {
   // // runApp(
   // //   child : const MyApp(),
   // // );
+  setupDI();
   runApp(const MyApp());
 }
 

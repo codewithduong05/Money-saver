@@ -23,6 +23,8 @@ class TransactionRepository {
             createdAt: DateTime.now(),
           ),
         );
+
+    print(db);
   }
 
   Future<void> addIncome({

@@ -1,4 +1,5 @@
-import 'package:save_money/src/domain/entity/category_entity.dart';
+// domain/repository/category_repository.dart
+import '../entity/category_entity.dart';
 
 abstract class CategoryRepository {
   Future<List<CategoryEntity>> getAllCategories(String type);

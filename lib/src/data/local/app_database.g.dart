@@ -31,22 +31,59 @@ class $CategoriesTable extends Categories
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _isExpenseMeta = const VerificationMeta(
-    'isExpense',
+  static const VerificationMeta _parentIdMeta = const VerificationMeta(
+    'parentId',
   );
   @override
-  late final GeneratedColumn<bool> isExpense = GeneratedColumn<bool>(
-    'is_expense',
+  late final GeneratedColumn<int> parentId = GeneratedColumn<int>(
+    'parent_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
+  @override
+  late final GeneratedColumn<String> icon = GeneratedColumn<String>(
+    'icon',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
     aliasedName,
     false,
     type: DriftSqlType.bool,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_expense" IN (0, 1))',
+      'CHECK ("is_active" IN (0, 1))',
     ),
+    defaultValue: const Constant(true),
   );
   @override
-  List<GeneratedColumn> get $columns => [id, name, isExpense];
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    parentId,
+    type,
+    icon,
+    isActive,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -70,13 +107,33 @@ class $CategoriesTable extends Categories
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('is_expense')) {
+    if (data.containsKey('parent_id')) {
       context.handle(
-        _isExpenseMeta,
-        isExpense.isAcceptableOrUnknown(data['is_expense']!, _isExpenseMeta),
+        _parentIdMeta,
+        parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta),
+      );
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
       );
     } else if (isInserting) {
-      context.missing(_isExpenseMeta);
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('icon')) {
+      context.handle(
+        _iconMeta,
+        icon.isAcceptableOrUnknown(data['icon']!, _iconMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_iconMeta);
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
     }
     return context;
   }
@@ -95,9 +152,21 @@ class $CategoriesTable extends Categories
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
-      isExpense: attachedDatabase.typeMapping.read(
+      parentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}parent_id'],
+      ),
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      icon: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
-        data['${effectivePrefix}is_expense'],
+        data['${effectivePrefix}is_active'],
       )!,
     );
   }
@@ -111,18 +180,29 @@ class $CategoriesTable extends Categories
 class Category extends DataClass implements Insertable<Category> {
   final int id;
   final String name;
-  final bool isExpense;
+  final int? parentId;
+  final String type;
+  final String icon;
+  final bool isActive;
   const Category({
     required this.id,
     required this.name,
-    required this.isExpense,
+    this.parentId,
+    required this.type,
+    required this.icon,
+    required this.isActive,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
-    map['is_expense'] = Variable<bool>(isExpense);
+    if (!nullToAbsent || parentId != null) {
+      map['parent_id'] = Variable<int>(parentId);
+    }
+    map['type'] = Variable<String>(type);
+    map['icon'] = Variable<String>(icon);
+    map['is_active'] = Variable<bool>(isActive);
     return map;
   }
 
@@ -130,7 +210,12 @@ class Category extends DataClass implements Insertable<Category> {
     return CategoriesCompanion(
       id: Value(id),
       name: Value(name),
-      isExpense: Value(isExpense),
+      parentId: parentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentId),
+      type: Value(type),
+      icon: Value(icon),
+      isActive: Value(isActive),
     );
   }
 
@@ -142,7 +227,10 @@ class Category extends DataClass implements Insertable<Category> {
     return Category(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      isExpense: serializer.fromJson<bool>(json['isExpense']),
+      parentId: serializer.fromJson<int?>(json['parentId']),
+      type: serializer.fromJson<String>(json['type']),
+      icon: serializer.fromJson<String>(json['icon']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
     );
   }
   @override
@@ -151,20 +239,36 @@ class Category extends DataClass implements Insertable<Category> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
-      'isExpense': serializer.toJson<bool>(isExpense),
+      'parentId': serializer.toJson<int?>(parentId),
+      'type': serializer.toJson<String>(type),
+      'icon': serializer.toJson<String>(icon),
+      'isActive': serializer.toJson<bool>(isActive),
     };
   }
 
-  Category copyWith({int? id, String? name, bool? isExpense}) => Category(
+  Category copyWith({
+    int? id,
+    String? name,
+    Value<int?> parentId = const Value.absent(),
+    String? type,
+    String? icon,
+    bool? isActive,
+  }) => Category(
     id: id ?? this.id,
     name: name ?? this.name,
-    isExpense: isExpense ?? this.isExpense,
+    parentId: parentId.present ? parentId.value : this.parentId,
+    type: type ?? this.type,
+    icon: icon ?? this.icon,
+    isActive: isActive ?? this.isActive,
   );
   Category copyWithCompanion(CategoriesCompanion data) {
     return Category(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
-      isExpense: data.isExpense.present ? data.isExpense.value : this.isExpense,
+      parentId: data.parentId.present ? data.parentId.value : this.parentId,
+      type: data.type.present ? data.type.value : this.type,
+      icon: data.icon.present ? data.icon.value : this.icon,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
     );
   }
 
@@ -173,58 +277,86 @@ class Category extends DataClass implements Insertable<Category> {
     return (StringBuffer('Category(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('isExpense: $isExpense')
+          ..write('parentId: $parentId, ')
+          ..write('type: $type, ')
+          ..write('icon: $icon, ')
+          ..write('isActive: $isActive')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, isExpense);
+  int get hashCode => Object.hash(id, name, parentId, type, icon, isActive);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Category &&
           other.id == this.id &&
           other.name == this.name &&
-          other.isExpense == this.isExpense);
+          other.parentId == this.parentId &&
+          other.type == this.type &&
+          other.icon == this.icon &&
+          other.isActive == this.isActive);
 }
 
 class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<int> id;
   final Value<String> name;
-  final Value<bool> isExpense;
+  final Value<int?> parentId;
+  final Value<String> type;
+  final Value<String> icon;
+  final Value<bool> isActive;
   const CategoriesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
-    this.isExpense = const Value.absent(),
+    this.parentId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.icon = const Value.absent(),
+    this.isActive = const Value.absent(),
   });
   CategoriesCompanion.insert({
     this.id = const Value.absent(),
     required String name,
-    required bool isExpense,
+    this.parentId = const Value.absent(),
+    required String type,
+    required String icon,
+    this.isActive = const Value.absent(),
   }) : name = Value(name),
-       isExpense = Value(isExpense);
+       type = Value(type),
+       icon = Value(icon);
   static Insertable<Category> custom({
     Expression<int>? id,
     Expression<String>? name,
-    Expression<bool>? isExpense,
+    Expression<int>? parentId,
+    Expression<String>? type,
+    Expression<String>? icon,
+    Expression<bool>? isActive,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
-      if (isExpense != null) 'is_expense': isExpense,
+      if (parentId != null) 'parent_id': parentId,
+      if (type != null) 'type': type,
+      if (icon != null) 'icon': icon,
+      if (isActive != null) 'is_active': isActive,
     });
   }
 
   CategoriesCompanion copyWith({
     Value<int>? id,
     Value<String>? name,
-    Value<bool>? isExpense,
+    Value<int?>? parentId,
+    Value<String>? type,
+    Value<String>? icon,
+    Value<bool>? isActive,
   }) {
     return CategoriesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
-      isExpense: isExpense ?? this.isExpense,
+      parentId: parentId ?? this.parentId,
+      type: type ?? this.type,
+      icon: icon ?? this.icon,
+      isActive: isActive ?? this.isActive,
     );
   }
 
@@ -237,8 +369,17 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
-    if (isExpense.present) {
-      map['is_expense'] = Variable<bool>(isExpense.value);
+    if (parentId.present) {
+      map['parent_id'] = Variable<int>(parentId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (icon.present) {
+      map['icon'] = Variable<String>(icon.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
     }
     return map;
   }
@@ -248,7 +389,10 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     return (StringBuffer('CategoriesCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('isExpense: $isExpense')
+          ..write('parentId: $parentId, ')
+          ..write('type: $type, ')
+          ..write('icon: $icon, ')
+          ..write('isActive: $isActive')
           ..write(')'))
         .toString();
   }
@@ -1228,13 +1372,19 @@ typedef $$CategoriesTableCreateCompanionBuilder =
     CategoriesCompanion Function({
       Value<int> id,
       required String name,
-      required bool isExpense,
+      Value<int?> parentId,
+      required String type,
+      required String icon,
+      Value<bool> isActive,
     });
 typedef $$CategoriesTableUpdateCompanionBuilder =
     CategoriesCompanion Function({
       Value<int> id,
       Value<String> name,
-      Value<bool> isExpense,
+      Value<int?> parentId,
+      Value<String> type,
+      Value<String> icon,
+      Value<bool> isActive,
     });
 
 final class $$CategoriesTableReferences
@@ -1301,8 +1451,23 @@ class $$CategoriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get isExpense => $composableBuilder(
-    column: $table.isExpense,
+  ColumnFilters<int> get parentId => $composableBuilder(
+    column: $table.parentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1376,8 +1541,23 @@ class $$CategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get isExpense => $composableBuilder(
-    column: $table.isExpense,
+  ColumnOrderings<int> get parentId => $composableBuilder(
+    column: $table.parentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -1397,8 +1577,17 @@ class $$CategoriesTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<bool> get isExpense =>
-      $composableBuilder(column: $table.isExpense, builder: (column) => column);
+  GeneratedColumn<int> get parentId =>
+      $composableBuilder(column: $table.parentId, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get icon =>
+      $composableBuilder(column: $table.icon, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
 
   Expression<T> transactionsRefs<T extends Object>(
     Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
@@ -1481,18 +1670,33 @@ class $$CategoriesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
-                Value<bool> isExpense = const Value.absent(),
-              }) =>
-                  CategoriesCompanion(id: id, name: name, isExpense: isExpense),
+                Value<int?> parentId = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<String> icon = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+              }) => CategoriesCompanion(
+                id: id,
+                name: name,
+                parentId: parentId,
+                type: type,
+                icon: icon,
+                isActive: isActive,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
-                required bool isExpense,
+                Value<int?> parentId = const Value.absent(),
+                required String type,
+                required String icon,
+                Value<bool> isActive = const Value.absent(),
               }) => CategoriesCompanion.insert(
                 id: id,
                 name: name,
-                isExpense: isExpense,
+                parentId: parentId,
+                type: type,
+                icon: icon,
+                isActive: isActive,
               ),
           withReferenceMapper: (p0) => p0
               .map(

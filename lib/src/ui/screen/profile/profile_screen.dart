@@ -1,5 +1,17 @@
+// src/ui/screen/profile_screen.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:save_money/src/data/local/app_database.dart';
+import 'package:save_money/src/ui/screen/profile/category/category_list_screen.dart';
+import 'package:save_money/src/ui/screen/profile/group/group_screen.dart';
 import 'package:save_money/src/ui/screen/profile/setting/setting_screen.dart';
+import 'package:save_money/src/ui/screen/profile/wallet/wallet_screen.dart';
+import 'package:save_money/src/ui/viewmodel/category_viewmodel.dart';
+import 'package:provider/provider.dart';
+import 'package:save_money/src/ui/viewmodel/category_viewmodel.dart';
+import 'package:save_money/src/domain/usecase/get_category_tree_usecase.dart';
+import 'package:save_money/src/injector.dart';
+import 'package:save_money/src/ui/screen/profile/category/category_list_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -15,13 +27,31 @@ class ProfileScreen extends StatelessWidget {
             leading: const Icon(Icons.account_balance_wallet_outlined),
             title: const Text('Ví của tôi'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const WalletScreen()),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.all_inbox),
             title: const Text('Nhóm'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChangeNotifierProvider(
+                    create: (_) =>
+                        CategoryViewModel(_getCategoryTree)(_getCategoryTree)(
+                          getIt<GetCategoryTreeUseCase>(),
+                        )..loadCategories("expense"),
+                    child: const CategoryScreen(),
+                  ),
+                ),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.settings_outlined),
